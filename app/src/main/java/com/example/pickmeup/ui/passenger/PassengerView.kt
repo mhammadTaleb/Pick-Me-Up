@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.runtime.*
 
 data class BottomNavigationItem(
     val title: String,
@@ -106,7 +107,9 @@ class PassengerView : ComponentActivity() {
 
 
 @Composable
-fun HomeScreen(navController: NavHostController) {    }
+fun HomeScreen(navController: NavHostController) { 
+    Text(text = "Hello android")
+}
 
 @Composable
 fun ProfileScreen(navController: NavHostController) {
