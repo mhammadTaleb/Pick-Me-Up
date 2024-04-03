@@ -9,7 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.example.pickmeup.ui.theme.PickMeUpTheme
-import com.example.pickmeup.ui.login.LoginView
+import com.example.pickmeup.ui.passenger.PassengerView
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,7 +21,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val intent = Intent(this, LoginView::class.java)
+                    val intent = Intent(this, PassengerView::class.java)
                     startActivity(intent)
                     finish()
                 }
