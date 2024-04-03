@@ -8,4 +8,5 @@
     <string name="phone_number">Phone Number</string>
     <string name="last_name">Last Name</string>
     <string name="first_name">First Name</string>
+    <string name="title_activity_passenger_view">PassengerView</string>
 </resources>
