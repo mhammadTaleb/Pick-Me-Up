@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -167,12 +166,12 @@ fun MapDemo(context: Context){
     var targetMarkerState by remember {
         mutableStateOf(false)
     }
-    var uiSetting by remember { mutableStateOf(MapUiSettings()) }
-    var properties by remember {
+    val uiSetting by remember { mutableStateOf(MapUiSettings()) }
+    val properties by remember {
         mutableStateOf(MapProperties(mapType = MapType.NORMAL))
     }
 
-    var currentPosition by remember { mutableStateOf(LatLng(33.8938,35.5018)) }
+    val currentPosition by remember { mutableStateOf(LatLng(33.8938,35.5018)) }
 
     var pickUpLatLng by remember {
         mutableStateOf( LatLng(33.8938,35.5018))
