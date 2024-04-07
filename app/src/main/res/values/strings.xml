@@ -9,4 +9,10 @@
     <string name="last_name">Last Name</string>
     <string name="first_name">First Name</string>
     <string name="title_activity_passenger_view">PassengerView</string>
+
+    <!--
+      <string name="API_KEY">AIzaSyBvaPbilorOvvHD0KV9GoZUlserI1E1khU</string>
+
+        -->
+
 </resources>

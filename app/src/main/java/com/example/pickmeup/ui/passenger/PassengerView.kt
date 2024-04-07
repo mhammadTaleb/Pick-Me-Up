@@ -92,7 +92,7 @@ class PassengerView : ComponentActivity() {
                     BottomNavigationItem("home", Icons.Filled.Home, Icons.Outlined.Home),
                     BottomNavigationItem("profile", Icons.Filled.Person, Icons.Outlined.Person)
                 )
-                var selectedItemIndex by remember { mutableStateOf(0) }
+                var selectedItemIndex by remember { mutableIntStateOf(0) }
                 val navController = rememberNavController()
 
                 // A surface container using the 'background' color from the theme
@@ -191,7 +191,7 @@ fun MapDemo(context: Context){
     }
 
 
-    var cameraPosition= rememberCameraPositionState{
+    val cameraPosition= rememberCameraPositionState{
         position= CameraPosition.fromLatLngZoom(currentPosition,13f)
     }
 
@@ -274,7 +274,6 @@ fun MapDemo(context: Context){
                     .border(width = 1.dp, color = Color.Black, shape = RoundedCornerShape(8.dp))
                     .padding(8.dp)
 
-
             ) {
 
                 Row(
@@ -317,7 +316,7 @@ fun MapDemo(context: Context){
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = {   }) {
                 Image(
                     painter = painterResource(id = com.example.pickmeup.R.drawable.pin3),
                     contentDescription = "marker",
@@ -473,13 +472,13 @@ fun getCurrentLocation(
     if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
         // Request location permissions
         ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 0)
-        Log.i("xxxx", "if statement")
+       // Log.i("xxxx", "if statement")
     } else {
         // Permissions already granted, get the location
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
                 // Use the location object as needed
-                Log.i("xxxx", "Location: ${location?.latitude}, ${location?.longitude}")
+              //  Log.i("xxxx", "Location: ${location?.latitude}, ${location?.longitude}")
                 location?.let {
                     onLocationReceived(it.latitude, it.longitude)
                 }?: WhenItIsNull(context)

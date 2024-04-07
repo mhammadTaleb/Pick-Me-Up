@@ -18,10 +18,9 @@
         android:theme="@style/Theme.PickMeUp"
         tools:targetApi="31">
 
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBvaPbilorOvvHD0KV9GoZUlserI1E1khU" />
+            android:value="@string/API_KEY" />
 
 
         <activity
