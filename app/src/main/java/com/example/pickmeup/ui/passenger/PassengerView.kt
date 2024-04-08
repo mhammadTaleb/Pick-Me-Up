@@ -34,11 +34,9 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.*
 import android.location.Address
 import android.location.Geocoder
-import android.util.Log
 import android.widget.Toast
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.maps.android.compose.CameraPositionState
 import java.util.Locale
 import android.Manifest
 import android.app.Activity
@@ -75,6 +73,10 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import android.content.Context
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.ui.text.font.FontFamily
 
 
 data class BottomNavigationItem(
@@ -82,6 +84,7 @@ data class BottomNavigationItem(
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector
 )
+
 class PassengerView : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,7 +95,8 @@ class PassengerView : ComponentActivity() {
                     BottomNavigationItem("home", Icons.Filled.Home, Icons.Outlined.Home),
                     BottomNavigationItem("profile", Icons.Filled.Person, Icons.Outlined.Person)
                 )
-                var selectedItemIndex by remember { mutableIntStateOf(0) }
+                // Initialize selectedItemIndex to the index of the "home" item
+                var selectedItemIndex by remember { mutableStateOf(items.indexOfFirst { it.title == "home" }) }
                 val navController = rememberNavController()
 
                 // A surface container using the 'background' color from the theme
@@ -129,7 +133,6 @@ class PassengerView : ComponentActivity() {
                     ) { innerPadding ->
                         Box(modifier = Modifier.padding(innerPadding)) {
                             NavHost(navController = navController, startDestination = "home") {
-
                                 composable("search") {
                                     SearchScreen(navController)
                                 }
@@ -149,14 +152,211 @@ class PassengerView : ComponentActivity() {
 }
 
 
+
 @Composable
 fun HomeScreen(navController: NavHostController, context: Context) {
 
-    MapDemo(context = context)
+
+    // MapDemo(context = context)
+    PickUps(context = context, navController)
 }
 
 @Composable
-fun MapDemo(context: Context){
+fun PickUps(context: Context, navController: NavHostController){
+
+    val (showMapComposable, setShowMapComposable) = remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(), // Use fillMaxWidth for the Row
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Request new Pick UP",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.SansSerif,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(150.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier.weight(0.8f)
+            ) {
+
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Box(                        // pick up location box
+                        modifier = Modifier
+                            .padding(start = 15.dp, end = 15.dp, top = 15.dp)
+                            .background(color = Color.White, shape = RoundedCornerShape(8.dp))
+                            .border(
+                                width = 1.dp,
+                                color = Color.Black,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(8.dp)
+                    ) {
+                        // row for pick up location and cancel button
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Enter pick up location",
+                                fontSize = 18.sp,
+                                color = Color.Black
+                            )
+                        }
+                    }
+                    Box(                    //target location box
+                        modifier = Modifier
+                            .padding(start = 15.dp, end = 15.dp, top = 15.dp)
+                            .background(color = Color.White, shape = RoundedCornerShape(8.dp))
+                            .border(
+                                width = 1.dp,
+                                color = Color.Black,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(8.dp)
+                    ) {
+                        // row for pick up location and cancel button
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Enter destination",
+                                fontSize = 18.sp,
+                                color = Color.Black
+                            )
+                        }
+                    }
+                }
+            }
+            Box(                    //add button box
+                modifier = Modifier
+                    .weight(0.2f)
+                    .fillMaxSize()
+                    .padding(5.dp)
+            ) {
+                Button(
+                    onClick = {
+                        setShowMapComposable(!showMapComposable)
+                    },
+                    shape = MaterialTheme.shapes.medium, // Set the button shape to medium (cubic)
+                    modifier = Modifier.fillMaxSize(), // Fill the entire available space in the box
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Clock icon",
+                            modifier = Modifier.padding(end = 8.dp) // Add padding to the right of the icon
+                        )
+                    }
+                }
+            }
+        }
+
+                // time row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier.weight(0.8f)
+            ) {
+
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Box(                        // pick up location box
+                        modifier = Modifier
+                            .padding(start = 15.dp, end = 15.dp, top = 15.dp)
+                            .background(color = Color.White, shape = RoundedCornerShape(8.dp))
+                            .border(
+                                width = 1.dp,
+                                color = Color.Black,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                            .padding(8.dp)
+                    ) {
+                        // row for pick up location and cancel button
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Set time",
+                                fontSize = 18.sp,
+                                color = Color.Black
+                            )
+                        }
+                    }
+                }
+            }
+            Box(                    //add button box
+                modifier = Modifier
+                    .weight(0.2f)
+                    .fillMaxSize()
+                    .padding(5.dp)
+            ) {
+                Button(
+                    onClick = {
+                        setShowMapComposable(!showMapComposable)
+                    },
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.fillMaxSize(),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Image(
+                            painter = painterResource(id = com.example.pickmeup.R.drawable.calendar ),
+                            contentDescription = "date",
+                            modifier = Modifier
+                                .padding(end = 8.dp)
+                                .size(42.dp)
+                                
+                        )
+                      /*  Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = "Clock icon",
+                            modifier = Modifier.padding(end = 8.dp).size(42.dp)
+                        ) */
+                    }
+                }
+            }
+
+        }
+
+
+
+    }
+
+
+
+    if (showMapComposable) {
+        MapView(context, navController)
+    }
+}
+
+
+
+@Composable
+fun MapView(context: Context,navController: NavHostController){
 
     // var defaultLocation=  LatLng(33.8938,35.5018)
 
@@ -189,12 +389,12 @@ fun MapDemo(context: Context){
     var mainButtonState by remember {
         mutableStateOf("Set Pick Up location")
     }
+    val (showMainComposable, setShowMainComposable) = remember { mutableStateOf(false) }
 
 
     val cameraPosition= rememberCameraPositionState{
         position= CameraPosition.fromLatLngZoom(currentPosition,13f)
     }
-
 
 
     Box(
@@ -221,8 +421,6 @@ fun MapDemo(context: Context){
                 visible = targetMarkerState
             )
         }
-
-
         Column (
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -275,7 +473,7 @@ fun MapDemo(context: Context){
                     .padding(8.dp)
 
             ) {
-
+                // row for target location and cancel button
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -355,6 +553,26 @@ fun MapDemo(context: Context){
             }
         }
 
+        // search location button
+
+        Column (
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+                .padding(bottom = 180.dp)
+        ){
+            IconButton(
+                modifier = Modifier.size(45.dp),
+                onClick = {
+
+                }) {
+                Image(
+                    painter = painterResource(id = com.example.pickmeup.R.drawable.search2),
+                    contentDescription = "Get Current Location",
+
+                    )
+            }
+        }
 
 
         // centered button ( set pick up, target, confirm)
@@ -369,6 +587,7 @@ fun MapDemo(context: Context){
             Button(
                 modifier = Modifier
                     .size(width = 220.dp, height = 50.dp),
+
                 shape = RoundedCornerShape(15.dp),
                 onClick = {
 
@@ -403,6 +622,7 @@ fun MapDemo(context: Context){
                                 mainButtonState= "Confirm pick up"
                         }
                     } else if (mainButtonState == "Confirm pick up") {
+                        setShowMainComposable(!showMainComposable)
 
 
                         Toast.makeText(context, "Confirmation", Toast.LENGTH_SHORT).show()
@@ -416,6 +636,11 @@ fun MapDemo(context: Context){
                 )
             }
 
+
+            if (showMainComposable) {
+
+                navController.navigate("home")
+            }
 
         }
     }
