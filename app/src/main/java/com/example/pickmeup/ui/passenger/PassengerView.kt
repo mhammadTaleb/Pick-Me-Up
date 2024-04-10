@@ -1,12 +1,44 @@
 package com.example.pickmeup.ui.passenger
 
+import android.Manifest
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.Context
+import android.content.DialogInterface
+import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
+import android.location.Location
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -14,55 +46,29 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.navigation.NavHostController
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import com.example.pickmeup.ui.passenger.ui.theme.PickMeUpTheme
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.runtime.*
-import android.location.Address
-import android.location.Geocoder
-import android.widget.Toast
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.CameraUpdateFactory
-import java.util.Locale
-import android.Manifest
-import android.app.Activity
-import android.app.AlertDialog
-import android.content.DialogInterface
-import android.content.pm.PackageManager
-import android.location.Location
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.IconButton
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.pickmeup.ui.passenger.ui.theme.PickMeUpTheme
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -72,11 +78,14 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import android.content.Context
-import androidx.compose.foundation.layout.height
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.ui.text.font.FontFamily
+import com.vanpra.composematerialdialogs.MaterialDialog
+import com.vanpra.composematerialdialogs.datetime.date.datepicker
+import com.vanpra.composematerialdialogs.datetime.time.timepicker
+import com.vanpra.composematerialdialogs.rememberMaterialDialogState
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 
 data class BottomNavigationItem(
@@ -156,15 +165,106 @@ class PassengerView : ComponentActivity() {
 @Composable
 fun HomeScreen(navController: NavHostController, context: Context) {
 
-
     // MapDemo(context = context)
     PickUps(context = context, navController)
+
+    TimeAndDatePicker(context = context)
+
+}
+
+
+@Composable
+fun TimeAndDatePicker(context: Context) {
+
+    var pickedDate by remember {
+        mutableStateOf(LocalDate.now())
+    }
+    var pickedTime by remember{
+        mutableStateOf(LocalTime.NOON)
+    }
+    val formattedDate by remember {
+        derivedStateOf {
+            DateTimeFormatter
+                .ofPattern("MMM dd yyyy")
+                .format(pickedDate)
+        }
+    }
+    val formattedTime by remember {
+        derivedStateOf {
+            DateTimeFormatter
+                .ofPattern("hh:mm")
+                .format(pickedTime)
+        }
+    }
+
+    val dateDialogState= rememberMaterialDialogState()
+    val timeDialogState= rememberMaterialDialogState()
+
+    Column(
+        modifier= Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Button(onClick = {
+            dateDialogState.show()
+        }) {
+            Text(text = "Pick date")
+        }
+        Text(text = formattedDate)
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = {
+            timeDialogState.show()
+        }) {
+            Text(text = "Pick time")
+        }
+        Text(text = formattedTime)
+    }
+
+    MaterialDialog(
+        dialogState = dateDialogState,
+        buttons = {
+            positiveButton(text = "OK"){
+
+            }
+            negativeButton(text= "Cancel")
+        }
+    ) {
+        datepicker(
+            initialDate = LocalDate.now(),
+            title       = "Pick a date",
+            allowedDateValidator = {
+                // remove the date that are more that one month from now
+                it.dayOfMonth > 0
+            }
+        ){
+            pickedDate= it
+        }
+    }
+
+    MaterialDialog(
+        dialogState = timeDialogState,
+        buttons = {
+            positiveButton(text = "OK"){
+
+            }
+            negativeButton(text= "Cancel")
+        }
+    ) {
+        timepicker(
+            initialTime = LocalTime.NOON,
+            title       = "Pick a time",
+            timeRange = LocalTime.MIDNIGHT..LocalTime.NOON
+        ){
+            pickedTime= it
+        }
+    }
 }
 
 @Composable
 fun PickUps(context: Context, navController: NavHostController){
 
     val (showMapComposable, setShowMapComposable) = remember { mutableStateOf(false) }
+
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -301,7 +401,7 @@ fun PickUps(context: Context, navController: NavHostController){
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Set time",
+                                text = "Set time",                  // time text
                                 fontSize = 18.sp,
                                 color = Color.Black
                             )
@@ -317,25 +417,30 @@ fun PickUps(context: Context, navController: NavHostController){
             ) {
                 Button(
                     onClick = {
-                        setShowMapComposable(!showMapComposable)
+                        //setShowMapComposable(!showMapComposable)
+
                     },
                     shape = MaterialTheme.shapes.medium,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier
+                    = Modifier.fillMaxSize(),
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(
+                       /* Image(
                             painter = painterResource(id = com.example.pickmeup.R.drawable.calendar ),
                             contentDescription = "date",
                             modifier = Modifier
                                 .padding(end = 8.dp)
                                 .size(42.dp)
                                 
-                        )
-                      /*  Icon(
+                        ) */
+                        Icon(
+                          //  Icons.Filled.DateRange,
                             imageVector = Icons.Default.DateRange,
                             contentDescription = "Clock icon",
-                            modifier = Modifier.padding(end = 8.dp).size(42.dp)
-                        ) */
+                            modifier = Modifier
+                                .padding(end = 8.dp)
+                                .size(100.dp)
+                        )
                     }
                 }
             }
