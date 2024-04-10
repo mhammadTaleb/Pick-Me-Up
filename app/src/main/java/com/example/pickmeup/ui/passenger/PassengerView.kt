@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,9 +27,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Home
@@ -166,13 +165,11 @@ class PassengerView : ComponentActivity() {
 fun HomeScreen(navController: NavHostController, context: Context) {
 
     // MapDemo(context = context)
-    PickUps(context = context, navController)
-
-    TimeAndDatePicker(context = context)
+    PickUps(context = context, navController,null, null)
 
 }
 
-
+/*
 @Composable
 fun TimeAndDatePicker(context: Context) {
 
@@ -203,7 +200,7 @@ fun TimeAndDatePicker(context: Context) {
     Column(
         modifier= Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Bottom,
     ) {
         Button(onClick = {
             dateDialogState.show()
@@ -259,33 +256,75 @@ fun TimeAndDatePicker(context: Context) {
         }
     }
 }
+*/
 
 @Composable
-fun PickUps(context: Context, navController: NavHostController){
+fun PickUps(context: Context, navController: NavHostController, pickUpTitle: String?, targetTitle: String?){
 
     val (showMapComposable, setShowMapComposable) = remember { mutableStateOf(false) }
+
+    var pickedDate by remember {
+        mutableStateOf(LocalDate.now())
+    }
+    var pickedTime by remember{
+        mutableStateOf(LocalTime.now())
+    }
+    val formattedDate by remember {
+        derivedStateOf {
+            DateTimeFormatter
+                .ofPattern("MMM dd yyyy")
+                .format(pickedDate)
+        }
+    }
+    val formattedTime by remember {
+        derivedStateOf {
+            DateTimeFormatter
+                .ofPattern("hh:mm")
+                .format(pickedTime)
+        }
+    }
+
+    val dateDialogState= rememberMaterialDialogState()
+    val timeDialogState= rememberMaterialDialogState()
+
+    var isButtonEnabled by remember { mutableStateOf(false) }
 
 
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(), // Use fillMaxWidth for the Row
+            modifier = Modifier
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
                 text = "Request new Pick UP",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.SansSerif,
+                modifier = Modifier.padding(start = 10.dp, top = 16.dp)
+            )
+
+        }
+        Row (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 10.dp, top = 12.dp),
+            horizontalArrangement = Arrangement.Start
+        ){
+            Text(
+                text = "Location:",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.SansSerif,
                 modifier = Modifier.padding(top = 16.dp)
             )
-
         }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(150.dp),
+                .height(135.dp),
             horizontalArrangement = Arrangement.Center
         ) {
             Box(
@@ -297,7 +336,7 @@ fun PickUps(context: Context, navController: NavHostController){
                 ) {
                     Box(                        // pick up location box
                         modifier = Modifier
-                            .padding(start = 15.dp, end = 15.dp, top = 15.dp)
+                            .padding(start = 4.dp, end = 12.dp, top = 4.dp)
                             .background(color = Color.White, shape = RoundedCornerShape(8.dp))
                             .border(
                                 width = 1.dp,
@@ -313,7 +352,7 @@ fun PickUps(context: Context, navController: NavHostController){
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Enter pick up location",
+                                text = pickUpTitle ?: "Pick Up",
                                 fontSize = 18.sp,
                                 color = Color.Black
                             )
@@ -321,7 +360,7 @@ fun PickUps(context: Context, navController: NavHostController){
                     }
                     Box(                    //target location box
                         modifier = Modifier
-                            .padding(start = 15.dp, end = 15.dp, top = 15.dp)
+                            .padding(start = 4.dp, end = 12.dp, top = 12.dp)
                             .background(color = Color.White, shape = RoundedCornerShape(8.dp))
                             .border(
                                 width = 1.dp,
@@ -337,7 +376,7 @@ fun PickUps(context: Context, navController: NavHostController){
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Enter destination",
+                                text = "Destination",
                                 fontSize = 18.sp,
                                 color = Color.Black
                             )
@@ -350,6 +389,7 @@ fun PickUps(context: Context, navController: NavHostController){
                     .weight(0.2f)
                     .fillMaxSize()
                     .padding(5.dp)
+
             ) {
                 Button(
                     onClick = {
@@ -360,13 +400,28 @@ fun PickUps(context: Context, navController: NavHostController){
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = Icons.Default.Add,
+                            imageVector = Icons.Default.LocationOn,
                             contentDescription = "Clock icon",
                             modifier = Modifier.padding(end = 8.dp) // Add padding to the right of the icon
                         )
                     }
                 }
             }
+        }
+                                                    //
+        Row (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 10.dp),
+            horizontalArrangement = Arrangement.Start
+        ){
+            Text(
+                text = "Schedule:",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.SansSerif,
+                modifier = Modifier.padding(top = 16.dp)
+            )
         }
 
                 // time row
@@ -385,7 +440,7 @@ fun PickUps(context: Context, navController: NavHostController){
                 ) {
                     Box(                        // pick up location box
                         modifier = Modifier
-                            .padding(start = 15.dp, end = 15.dp, top = 15.dp)
+                            .padding(start = 4.dp, end = 12.dp, top = 15.dp)
                             .background(color = Color.White, shape = RoundedCornerShape(8.dp))
                             .border(
                                 width = 1.dp,
@@ -401,7 +456,7 @@ fun PickUps(context: Context, navController: NavHostController){
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Set time",                  // time text
+                                text = "$formattedDate, $formattedTime",                  // date & time text
                                 fontSize = 18.sp,
                                 color = Color.Black
                             )
@@ -417,22 +472,14 @@ fun PickUps(context: Context, navController: NavHostController){
             ) {
                 Button(
                     onClick = {
-                        //setShowMapComposable(!showMapComposable)
-
+                              //////////////////////////////////////////////////////////////////////////////////////////////////
+                        dateDialogState.show()
                     },
                     shape = MaterialTheme.shapes.medium,
                     modifier
                     = Modifier.fillMaxSize(),
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                       /* Image(
-                            painter = painterResource(id = com.example.pickmeup.R.drawable.calendar ),
-                            contentDescription = "date",
-                            modifier = Modifier
-                                .padding(end = 8.dp)
-                                .size(42.dp)
-                                
-                        ) */
                         Icon(
                           //  Icons.Filled.DateRange,
                             imageVector = Icons.Default.DateRange,
@@ -446,11 +493,67 @@ fun PickUps(context: Context, navController: NavHostController){
             }
 
         }
-
-
-
+        Row (
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ){
+                Button(
+                    modifier = Modifier
+                        .size(width = 220.dp, height = 50.dp),
+                    shape = RoundedCornerShape(15.dp),
+                    enabled = isButtonEnabled,
+                    onClick = {  }) {
+                    Text(
+                        text = "Confirm pick up",
+                        fontSize = 20.sp
+                    )
+                }
+        }
     }
 
+    MaterialDialog(
+        dialogState = dateDialogState,
+        buttons = {
+            positiveButton(text = "OK") {
+                timeDialogState.show()
+            }
+            negativeButton(text= "Cancel") {}
+        }
+
+    ) {
+        datepicker(
+            initialDate = LocalDate.now(),
+            title       = "Pick a date",
+            allowedDateValidator = {date ->
+                val today = LocalDate.now()
+                date >= today
+            }
+        ){
+            pickedDate= it
+        }
+    }
+
+    MaterialDialog(
+        dialogState = timeDialogState,
+        buttons = {
+            positiveButton(text = "OK"){
+            }
+            negativeButton(text= "Cancel")
+        }
+    ) {
+        val currentTime = LocalTime.now()
+        val today = LocalDate.now()
+
+        timepicker(
+            initialTime = if (pickedDate == today) currentTime.plusMinutes(5) else LocalTime.NOON,
+            title       = "Pick a time",
+            timeRange = if (pickedDate == today) currentTime.plusMinutes(5)..LocalTime.MAX else LocalTime.MIDNIGHT..LocalTime.MAX,
+        ){
+
+            pickedTime= it
+        }
+    }
 
 
     if (showMapComposable) {
@@ -745,6 +848,7 @@ fun MapView(context: Context,navController: NavHostController){
             if (showMainComposable) {
 
                 navController.navigate("home")
+            //    PickUps(context = context, navController = navController , pickUpTitle = pickUpTitle, targetTitle = targetTitle)
             }
 
         }
