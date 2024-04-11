@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -65,6 +67,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.pickmeup.data.model.SharedViewModel
 import com.example.pickmeup.ui.passenger.ui.theme.PickMeUpTheme
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -86,7 +89,6 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-
 data class BottomNavigationItem(
     val title: String,
     val selectedIcon: ImageVector,
@@ -94,6 +96,8 @@ data class BottomNavigationItem(
 )
 
 class PassengerView : ComponentActivity() {
+    private val sharedViewModel: SharedViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -103,11 +107,9 @@ class PassengerView : ComponentActivity() {
                     BottomNavigationItem("home", Icons.Filled.Home, Icons.Outlined.Home),
                     BottomNavigationItem("profile", Icons.Filled.Person, Icons.Outlined.Person)
                 )
-                // Initialize selectedItemIndex to the index of the "home" item
                 var selectedItemIndex by remember { mutableStateOf(items.indexOfFirst { it.title == "home" }) }
                 val navController = rememberNavController()
 
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -145,7 +147,7 @@ class PassengerView : ComponentActivity() {
                                     SearchScreen(navController)
                                 }
                                 composable("home") {
-                                    HomeScreen(navController, this@PassengerView)
+                                    HomeScreen(navController, this@PassengerView, sharedViewModel)
                                 }
                                 composable("profile") {
                                     ProfileScreen(navController)
@@ -160,108 +162,32 @@ class PassengerView : ComponentActivity() {
 }
 
 
-
 @Composable
-fun HomeScreen(navController: NavHostController, context: Context) {
+fun HomeScreen(navController: NavHostController, context: Context, sharedViewModel: SharedViewModel) {
 
-    // MapDemo(context = context)
-    PickUps(context = context, navController,null, null)
+    val navController = rememberNavController()
 
-}
-
-/*
-@Composable
-fun TimeAndDatePicker(context: Context) {
-
-    var pickedDate by remember {
-        mutableStateOf(LocalDate.now())
-    }
-    var pickedTime by remember{
-        mutableStateOf(LocalTime.NOON)
-    }
-    val formattedDate by remember {
-        derivedStateOf {
-            DateTimeFormatter
-                .ofPattern("MMM dd yyyy")
-                .format(pickedDate)
+    NavHost(navController = navController, startDestination = "pickUps") {
+        composable("pickUps") {
+            PickUps(context, navController, sharedViewModel)
         }
-    }
-    val formattedTime by remember {
-        derivedStateOf {
-            DateTimeFormatter
-                .ofPattern("hh:mm")
-                .format(pickedTime)
-        }
-    }
-
-    val dateDialogState= rememberMaterialDialogState()
-    val timeDialogState= rememberMaterialDialogState()
-
-    Column(
-        modifier= Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Bottom,
-    ) {
-        Button(onClick = {
-            dateDialogState.show()
-        }) {
-            Text(text = "Pick date")
-        }
-        Text(text = formattedDate)
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = {
-            timeDialogState.show()
-        }) {
-            Text(text = "Pick time")
-        }
-        Text(text = formattedTime)
-    }
-
-    MaterialDialog(
-        dialogState = dateDialogState,
-        buttons = {
-            positiveButton(text = "OK"){
-
-            }
-            negativeButton(text= "Cancel")
-        }
-    ) {
-        datepicker(
-            initialDate = LocalDate.now(),
-            title       = "Pick a date",
-            allowedDateValidator = {
-                // remove the date that are more that one month from now
-                it.dayOfMonth > 0
-            }
-        ){
-            pickedDate= it
-        }
-    }
-
-    MaterialDialog(
-        dialogState = timeDialogState,
-        buttons = {
-            positiveButton(text = "OK"){
-
-            }
-            negativeButton(text= "Cancel")
-        }
-    ) {
-        timepicker(
-            initialTime = LocalTime.NOON,
-            title       = "Pick a time",
-            timeRange = LocalTime.MIDNIGHT..LocalTime.NOON
-        ){
-            pickedTime= it
+        composable("mapView") {
+            MapView(context, navController, sharedViewModel)
         }
     }
 }
-*/
 
 @Composable
-fun PickUps(context: Context, navController: NavHostController, pickUpTitle: String?, targetTitle: String?){
+fun PickUps(context: Context, navController: NavHostController, sharedViewModel: SharedViewModel){
 
-    val (showMapComposable, setShowMapComposable) = remember { mutableStateOf(false) }
+
+    var pickUpTitle by remember {
+        mutableStateOf("Pick Up")
+    }
+
+    var targetTitle by remember {
+        mutableStateOf("Destination")
+    }
 
     var pickedDate by remember {
         mutableStateOf(LocalDate.now())
@@ -289,6 +215,18 @@ fun PickUps(context: Context, navController: NavHostController, pickUpTitle: Str
 
     var isButtonEnabled by remember { mutableStateOf(false) }
 
+    val pickUpTitleTest = sharedViewModel.pickUpTitle.value
+    val targetTitleTest = sharedViewModel.targetTitle.value
+
+    val showDialog = remember { mutableStateOf(false) }
+
+
+    if(pickUpTitleTest.isNotEmpty()){
+        pickUpTitle= pickUpTitleTest
+    }
+    if(targetTitleTest.isNotEmpty()){
+        targetTitle= targetTitleTest
+    }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -324,7 +262,7 @@ fun PickUps(context: Context, navController: NavHostController, pickUpTitle: Str
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(135.dp),
+                .heightIn(min= 135.dp, max= 180.dp), // row of two field and location button
             horizontalArrangement = Arrangement.Center
         ) {
             Box(
@@ -352,7 +290,7 @@ fun PickUps(context: Context, navController: NavHostController, pickUpTitle: Str
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = pickUpTitle ?: "Pick Up",
+                                text = pickUpTitle ,
                                 fontSize = 18.sp,
                                 color = Color.Black
                             )
@@ -376,7 +314,7 @@ fun PickUps(context: Context, navController: NavHostController, pickUpTitle: Str
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Destination",
+                                text = targetTitle,
                                 fontSize = 18.sp,
                                 color = Color.Black
                             )
@@ -387,16 +325,17 @@ fun PickUps(context: Context, navController: NavHostController, pickUpTitle: Str
             Box(                    //add button box
                 modifier = Modifier
                     .weight(0.2f)
-                    .fillMaxSize()
                     .padding(5.dp)
-
+                    .heightIn(max= 135.dp)
             ) {
                 Button(
+                    modifier = Modifier
+                        .fillMaxSize(),          // Fill the entire available space in the box
                     onClick = {
-                        setShowMapComposable(!showMapComposable)
+                        navController.navigate("mapView")
+
                     },
                     shape = MaterialTheme.shapes.medium, // Set the button shape to medium (cubic)
-                    modifier = Modifier.fillMaxSize(), // Fill the entire available space in the box
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
@@ -408,7 +347,7 @@ fun PickUps(context: Context, navController: NavHostController, pickUpTitle: Str
                 }
             }
         }
-                                                    //
+
         Row (
             modifier = Modifier
                 .fillMaxWidth()
@@ -455,8 +394,9 @@ fun PickUps(context: Context, navController: NavHostController, pickUpTitle: Str
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            val dateAndTimeField= "$formattedDate, $formattedTime"
                             Text(
-                                text = "$formattedDate, $formattedTime",                  // date & time text
+                                text = dateAndTimeField,                  // date & time text
                                 fontSize = 18.sp,
                                 color = Color.Black
                             )
@@ -472,7 +412,6 @@ fun PickUps(context: Context, navController: NavHostController, pickUpTitle: Str
             ) {
                 Button(
                     onClick = {
-                              //////////////////////////////////////////////////////////////////////////////////////////////////
                         dateDialogState.show()
                     },
                     shape = MaterialTheme.shapes.medium,
@@ -502,8 +441,13 @@ fun PickUps(context: Context, navController: NavHostController, pickUpTitle: Str
                     modifier = Modifier
                         .size(width = 220.dp, height = 50.dp),
                     shape = RoundedCornerShape(15.dp),
-                    enabled = isButtonEnabled,
-                    onClick = {  }) {
+                    enabled =
+                        if(pickUpTitle!="Pick Up" && targetTitle!="Destination" && isButtonEnabled){true}
+                        else {false},
+                    onClick = {
+                        showDialog.value = true
+                        // second confirmation
+                    }) {
                     Text(
                         text = "Confirm pick up",
                         fontSize = 20.sp
@@ -511,7 +455,9 @@ fun PickUps(context: Context, navController: NavHostController, pickUpTitle: Str
                 }
         }
     }
-
+    if(showDialog.value) {
+        InfoDialog(sharedViewModel, context)
+    }
     MaterialDialog(
         dialogState = dateDialogState,
         buttons = {
@@ -550,21 +496,42 @@ fun PickUps(context: Context, navController: NavHostController, pickUpTitle: Str
             title       = "Pick a time",
             timeRange = if (pickedDate == today) currentTime.plusMinutes(5)..LocalTime.MAX else LocalTime.MIDNIGHT..LocalTime.MAX,
         ){
-
+            isButtonEnabled=true
+            val dateAndTimeField ="$formattedDate, $formattedTime"
+            sharedViewModel.setDateAndTime(dateAndTimeField)
             pickedTime= it
         }
     }
 
 
-    if (showMapComposable) {
-        MapView(context, navController)
+}
+
+@Composable
+fun InfoDialog(sharedViewModel: SharedViewModel,context: Context) {
+
+  val text= "Pickup Title: ${sharedViewModel.pickUpTitle.value} \n" +
+          "ATarget Title: ${sharedViewModel.targetTitle.value} \n" +
+          "Pickup Latitude: ${sharedViewModel.pickUpLatLng.value.latitude}\n" +
+          "Pickup Longitude: ${sharedViewModel.pickUpLatLng.value.longitude}\n" +
+          "Target Latitude: ${sharedViewModel.targetLatLng.value.latitude}\n" +
+          "Target Longitude: ${sharedViewModel.targetLatLng.value.longitude}\n" +
+          "Date and Time: ${sharedViewModel.dateAndTime.value}"
+
+val dialogBuilder = AlertDialog.Builder(context)
+    dialogBuilder.apply {
+        setTitle("Information")
+        setMessage(text)
+        setPositiveButton("OK") { dialog: DialogInterface, _: Int ->
+            dialog.dismiss()
+        }
     }
+    val dialog = dialogBuilder.create()
+    dialog.show()
 }
 
 
-
 @Composable
-fun MapView(context: Context,navController: NavHostController){
+fun MapView(context: Context,navController: NavHostController, sharedViewModel: SharedViewModel){
 
     // var defaultLocation=  LatLng(33.8938,35.5018)
 
@@ -597,8 +564,6 @@ fun MapView(context: Context,navController: NavHostController){
     var mainButtonState by remember {
         mutableStateOf("Set Pick Up location")
     }
-    val (showMainComposable, setShowMainComposable) = remember { mutableStateOf(false) }
-
 
     val cameraPosition= rememberCameraPositionState{
         position= CameraPosition.fromLatLngZoom(currentPosition,13f)
@@ -782,7 +747,6 @@ fun MapView(context: Context,navController: NavHostController){
             }
         }
 
-
         // centered button ( set pick up, target, confirm)
         Column(
             modifier= Modifier
@@ -830,10 +794,16 @@ fun MapView(context: Context,navController: NavHostController){
                                 mainButtonState= "Confirm pick up"
                         }
                     } else if (mainButtonState == "Confirm pick up") {
-                        setShowMainComposable(!showMainComposable)
 
+                        sharedViewModel.setPickUpTitle(pickUpTitle)
+                        sharedViewModel.setTargetTitle(targetTitle)
 
-                        Toast.makeText(context, "Confirmation", Toast.LENGTH_SHORT).show()
+                        sharedViewModel.setPickUpLatLng(pickUpLatLng)
+                        sharedViewModel.setTargetLatLng(targetLatLng)
+
+                        navController.navigate("pickUps")
+
+                        Toast.makeText(context, "Confirmation", Toast.LENGTH_SHORT).show()  //confirmation
                     }
 
                 }) {
@@ -844,12 +814,6 @@ fun MapView(context: Context,navController: NavHostController){
                 )
             }
 
-
-            if (showMainComposable) {
-
-                navController.navigate("home")
-            //    PickUps(context = context, navController = navController , pickUpTitle = pickUpTitle, targetTitle = targetTitle)
-            }
 
         }
     }
@@ -906,7 +870,6 @@ fun getCurrentLocation(
     if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
         // Request location permissions
         ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 0)
-       // Log.i("xxxx", "if statement")
     } else {
         // Permissions already granted, get the location
         fusedLocationClient.lastLocation
