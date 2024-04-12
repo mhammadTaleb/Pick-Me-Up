@@ -69,7 +69,6 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation(libs.play.services.location)
 
-
     implementation(libs.compose.material.dialogs.datetime)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 

@@ -10,6 +10,7 @@ import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -54,6 +55,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -88,13 +90,17 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 data class BottomNavigationItem(
     val title: String,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector
 )
-
 class PassengerView : ComponentActivity() {
     private val sharedViewModel: SharedViewModel by viewModels()
 
@@ -177,6 +183,8 @@ fun HomeScreen(navController: NavHostController, context: Context, sharedViewMod
     }
 }
 
+
+
 @Composable
 fun PickUps(context: Context, navController: NavHostController, sharedViewModel: SharedViewModel){
 
@@ -213,7 +221,8 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
     val dateDialogState= rememberMaterialDialogState()
     val timeDialogState= rememberMaterialDialogState()
 
-    var isButtonEnabled by remember { mutableStateOf(false) }
+    var isButtonEnabled1 by remember { mutableStateOf(false) }
+    var isButtonEnabled2 by remember { mutableStateOf(false) }
 
     val pickUpTitleTest = sharedViewModel.pickUpTitle.value
     val targetTitleTest = sharedViewModel.targetTitle.value
@@ -223,10 +232,13 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
 
     if(pickUpTitleTest.isNotEmpty()){
         pickUpTitle= pickUpTitleTest
+        isButtonEnabled1= true
     }
     if(targetTitleTest.isNotEmpty()){
         targetTitle= targetTitleTest
     }
+
+
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -262,7 +274,7 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min= 135.dp, max= 180.dp), // row of two field and location button
+                .heightIn(min = 135.dp, max = 180.dp), // row of two field and location button
             horizontalArrangement = Arrangement.Center
         ) {
             Box(
@@ -326,7 +338,7 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
                 modifier = Modifier
                     .weight(0.2f)
                     .padding(5.dp)
-                    .heightIn(max= 135.dp)
+                    .heightIn(max = 135.dp)
             ) {
                 Button(
                     modifier = Modifier
@@ -417,6 +429,7 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
                     shape = MaterialTheme.shapes.medium,
                     modifier
                     = Modifier.fillMaxSize(),
+                    enabled = isButtonEnabled1
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
@@ -442,8 +455,7 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
                         .size(width = 220.dp, height = 50.dp),
                     shape = RoundedCornerShape(15.dp),
                     enabled =
-                        if(pickUpTitle!="Pick Up" && targetTitle!="Destination" && isButtonEnabled){true}
-                        else {false},
+                    isButtonEnabled1 && isButtonEnabled2,
                     onClick = {
                         showDialog.value = true
                         // second confirmation
@@ -457,6 +469,7 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
     }
     if(showDialog.value) {
         InfoDialog(sharedViewModel, context)
+        showDialog.value= false
     }
     MaterialDialog(
         dialogState = dateDialogState,
@@ -496,37 +509,14 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
             title       = "Pick a time",
             timeRange = if (pickedDate == today) currentTime.plusMinutes(5)..LocalTime.MAX else LocalTime.MIDNIGHT..LocalTime.MAX,
         ){
-            isButtonEnabled=true
+            pickedTime= it
+            isButtonEnabled2=true
             val dateAndTimeField ="$formattedDate, $formattedTime"
             sharedViewModel.setDateAndTime(dateAndTimeField)
-            pickedTime= it
         }
     }
 
 
-}
-
-@Composable
-fun InfoDialog(sharedViewModel: SharedViewModel,context: Context) {
-
-  val text= "Pickup Title: ${sharedViewModel.pickUpTitle.value} \n" +
-          "ATarget Title: ${sharedViewModel.targetTitle.value} \n" +
-          "Pickup Latitude: ${sharedViewModel.pickUpLatLng.value.latitude}\n" +
-          "Pickup Longitude: ${sharedViewModel.pickUpLatLng.value.longitude}\n" +
-          "Target Latitude: ${sharedViewModel.targetLatLng.value.latitude}\n" +
-          "Target Longitude: ${sharedViewModel.targetLatLng.value.longitude}\n" +
-          "Date and Time: ${sharedViewModel.dateAndTime.value}"
-
-val dialogBuilder = AlertDialog.Builder(context)
-    dialogBuilder.apply {
-        setTitle("Information")
-        setMessage(text)
-        setPositiveButton("OK") { dialog: DialogInterface, _: Int ->
-            dialog.dismiss()
-        }
-    }
-    val dialog = dialogBuilder.create()
-    dialog.show()
 }
 
 
@@ -569,6 +559,13 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
         position= CameraPosition.fromLatLngZoom(currentPosition,13f)
     }
 
+    var distanceAlpha by remember {
+        mutableStateOf(0.5f)
+    }
+
+    var distance by remember{
+        mutableStateOf(0.0)
+    }
 
     Box(
         modifier = Modifier
@@ -596,7 +593,7 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
         }
         Column (
             modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+          //  horizontalAlignment = Alignment.CenterHorizontally,
         ){
             //display pick up details
             Box(
@@ -624,6 +621,8 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
                             pickUpTitle= "Pick up location"
                             pickUpMarkerState= false
                             mainButtonState ="Set Pick Up location"
+                            distance= 0.0
+                            distanceAlpha= 0.5f
                         },
                         modifier = Modifier
                             .weight(0.1f)
@@ -635,7 +634,6 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
                         )
                     }
                 }
-
             }
             //display target details
             Box(
@@ -666,6 +664,8 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
                             targetMarkerState= false
                             if(mainButtonState!="Set Pick Up location"){
                                 mainButtonState = "Set Target location"
+                                distance= 0.0
+                                distanceAlpha=0.5f
                             }
                         },
                         modifier = Modifier
@@ -680,8 +680,23 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
                 }
 
             }
-
-        }   // center marker
+            Row(
+                modifier = Modifier
+                    .alpha(distanceAlpha)
+                    .padding(start = 15.dp, end = 15.dp, top = 5.dp)
+                    .background(color = Color.White, shape = RoundedCornerShape(8.dp))
+                    .border(width = 0.5.dp, color = Color.Black, shape = RoundedCornerShape(8.dp))
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Text(
+                    text = if (distance == 0.0) "distance:" else "distance: $distance Km",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+            }
+        }
+        // center marker
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -768,30 +783,34 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
                             cameraPosition.position.target.latitude - 0.00001, cameraPosition.position.target.longitude
                         )
                         // avoid null geolocation
-                        if (ReverseGeocode(pickUpLatLng, context).isNullOrEmpty()) {
+                        if (reverseGeocode(pickUpLatLng, context).isNullOrEmpty()) {
                             ShowWifiProblemDialog(context)
                         } else {
-                            pickUpTitle = ReverseGeocode(pickUpLatLng, context).toString()
+                            pickUpTitle = reverseGeocode(pickUpLatLng, context).toString()
                             pickUpMarkerState = true
-                            if (targetTitle == "Where to?")
-                                mainButtonState = "Set Target location"
+                            mainButtonState = if (targetTitle == "Where to?")
+                                "Set Target location"
                             else
-                                mainButtonState = "Confirm pick up"
+                                "Confirm pick up"
                         }
                     }
                     else if (mainButtonState == "Set Target location") {
                         targetLatLng = LatLng(cameraPosition.position.target.latitude - 0.00001, cameraPosition.position.target.longitude)
-                        if(ReverseGeocode(targetLatLng, context).isNullOrEmpty()){
+                        if(reverseGeocode(targetLatLng, context).isNullOrEmpty()){
                             ShowWifiProblemDialog(context)
                         }
                         else {
-                            targetTitle = ReverseGeocode(targetLatLng, context).toString()
+                            targetTitle = reverseGeocode(targetLatLng, context).toString()
 
                             targetMarkerState = true
+
                             if(targetTitle=="Pick up location")
                                 mainButtonState = "Set Pick Up location"
-                            else
-                                mainButtonState= "Confirm pick up"
+                            else {
+                                mainButtonState =  "Confirm pick up"
+                                distanceAlpha= 1f
+                                distance= calculateDistance(pickUpLatLng, targetLatLng)
+                            }
                         }
                     } else if (mainButtonState == "Confirm pick up") {
 
@@ -801,6 +820,7 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
                         sharedViewModel.setPickUpLatLng(pickUpLatLng)
                         sharedViewModel.setTargetLatLng(targetLatLng)
 
+                        sharedViewModel.setDistance(distance)
                         navController.navigate("pickUps")
 
                         Toast.makeText(context, "Confirmation", Toast.LENGTH_SHORT).show()  //confirmation
@@ -819,9 +839,59 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
     }
 }
 
-fun ReverseGeocode(latlng: LatLng, context: Context): String? {
-    var latitude = latlng.latitude
-    val longitude = latlng.longitude
+                    //FUNCTIONS
+////////////////////////////////////////////////////////////////////////////////////////////
+
+@Composable
+fun InfoDialog(sharedViewModel: SharedViewModel,context: Context) {
+
+    val text= "Pickup Title: ${sharedViewModel.pickUpTitle.value} \n" +
+            "Target Title: ${sharedViewModel.targetTitle.value} \n" +
+            "Pickup Latitude: ${sharedViewModel.pickUpLatLng.value.latitude}\n" +
+            "Pickup Longitude: ${sharedViewModel.pickUpLatLng.value.longitude}\n" +
+            "Target Latitude: ${sharedViewModel.targetLatLng.value.latitude}\n" +
+            "Target Longitude: ${sharedViewModel.targetLatLng.value.longitude}\n" +
+            "Distance: ${sharedViewModel.distance.value}\n"+
+            "Date and Time: ${sharedViewModel.dateAndTime.value}"
+
+    val dialogBuilder = AlertDialog.Builder(context)
+    dialogBuilder.apply {
+        setTitle("Information")
+        setMessage(text)
+        setPositiveButton("OK") { dialog: DialogInterface, _: Int ->
+            dialog.dismiss()
+        }
+    }
+    val dialog = dialogBuilder.create()
+    dialog.show()
+}
+
+
+fun calculateDistance(origin: LatLng, destination: LatLng): Double {
+    val earthRadius = 6371 // Radius of the earth in kilometers
+    // Convert latitude and longitude to radians
+    val latOrigin = Math.toRadians(origin.latitude)
+    val lonOrigin = Math.toRadians(origin.longitude)
+    val latDestination = Math.toRadians(destination.latitude)
+    val lonDestination = Math.toRadians(destination.longitude)
+
+    // Calculate the differences between the coordinates
+    val dLat = latDestination - latOrigin
+    val dLon = lonDestination - lonOrigin
+
+    // Apply the Haversine formula
+    val a = sin(dLat / 2).pow(2) + cos(latOrigin) * cos(latDestination) * sin(dLon / 2).pow(2)
+    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    val distance = earthRadius * c
+
+    // Format the distance to two decimal places
+    return String.format("%.2f", distance).toDouble()}
+
+
+fun reverseGeocode(latLng: LatLng, context: Context): String? {
+    val latitude = latLng.latitude
+    val longitude = latLng.longitude
 
     return try {
         val geoCoder = Geocoder(context, Locale.getDefault())
@@ -857,9 +927,6 @@ fun ReverseGeocode(latlng: LatLng, context: Context): String? {
         null
     }
 }
-
-
-
 
 fun getCurrentLocation(
     context: Context,
@@ -940,6 +1007,5 @@ fun ProfileScreen(navController: NavHostController) {
 
 @Composable
 fun SearchScreen(navController: NavHostController) {
-    // write a lazycolumn list of 100 items (list $number)
     Text("search screen")
 }

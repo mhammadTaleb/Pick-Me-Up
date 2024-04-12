@@ -12,8 +12,9 @@ class SharedViewModel : ViewModel() {
     val pickUpLatLng: MutableState<LatLng> = mutableStateOf(LatLng(33.8938,35.5018))
     val targetLatLng: MutableState<LatLng> = mutableStateOf(LatLng(33.8938,35.5018))
 
-    val dateAndTime: MutableState<String> = mutableStateOf("")
+    val distance:   MutableState<Double> = mutableStateOf(0.0)
 
+    val dateAndTime: MutableState<String> = mutableStateOf("")
     fun setPickUpTitle(title: String) {
         pickUpTitle.value = title
     }
@@ -27,6 +28,9 @@ class SharedViewModel : ViewModel() {
     }
     fun setTargetLatLng(title: LatLng){
         targetLatLng.value = title
+    }
+    fun setDistance(title: Double){
+        distance.value= title
     }
     fun setDateAndTime(dateTime: String) {
         dateAndTime.value = dateTime
