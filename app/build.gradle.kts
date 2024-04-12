@@ -1,11 +1,18 @@
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    id("com.google.gms.google-services")
 }
 
 android {
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("E:\\Backup\\keystore.jks")
+            storePassword = "mohammad"
+            keyAlias = "key0"
+            keyPassword = "mohammad"
+        }
+    }
     namespace = "com.example.pickmeup"
     compileSdk = 34
 
@@ -76,4 +83,8 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
+    implementation("com.google.firebase:firebase-auth")
+
 }
