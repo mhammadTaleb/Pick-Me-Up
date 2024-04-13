@@ -151,7 +151,7 @@ class PassengerViewModel {
                 "Pickup Longitude: ${sharedViewModel.pickUpLatLng.value.longitude}\n" +
                 "Target Latitude: ${sharedViewModel.targetLatLng.value.latitude}\n" +
                 "Target Longitude: ${sharedViewModel.targetLatLng.value.longitude}\n" +
-                "Distance: ${sharedViewModel.distance.value}\n"+
+                "Distance: ${sharedViewModel.distance.value} Km\n"+
                 "Date and Time: ${sharedViewModel.dateAndTime.value}"
 
         val dialogBuilder = AlertDialog.Builder(context)

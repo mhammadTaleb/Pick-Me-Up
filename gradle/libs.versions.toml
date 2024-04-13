@@ -38,6 +38,7 @@ play-services-location = { group = "com.google.android.gms", name = "play-servic
 compose-material-dialogs-datetime = { module = "io.github.vanpra.compose-material-dialogs:datetime", version = "0.9.0" }
 desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version = "2.0.4" }
 
+maps-platform = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1"
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

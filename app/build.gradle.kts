@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("com.google.gms.google-services")
-}
+    }
 
 android {
     signingConfigs {
@@ -20,6 +20,7 @@ android {
         applicationId = "com.example.pickmeup"
         minSdk = 24
         targetSdk = 34
+        compileSdk= 34
         versionCode = 1
         versionName = "1.0"
 
@@ -80,6 +81,8 @@ dependencies {
 
     implementation(libs.compose.material.dialogs.datetime)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    implementation(libs.maps.platform)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
