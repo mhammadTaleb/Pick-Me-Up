@@ -40,6 +40,10 @@ desugar-jdk-libs = "com.android.tools:desugar_jdk_libs:2.0.4"
 compose-material-dialogs-datetime = {module = "io.github.vanpra.compose-material-dialogs:datetime", version = "0.9.0"}
 firebase-auth = "com.google.firebase:firebase-auth-ktx:22.3.1"
 
+compose-material-dialogs-datetime = { module = "io.github.vanpra.compose-material-dialogs:datetime", version = "0.9.0" }
+desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version = "2.0.4" }
+
+
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
