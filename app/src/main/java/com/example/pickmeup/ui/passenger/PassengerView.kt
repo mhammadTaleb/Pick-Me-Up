@@ -1,16 +1,7 @@
 package com.example.pickmeup.ui.passenger
 
-import android.Manifest
-import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
-import android.content.pm.PackageManager
-import android.location.Address
-import android.location.Geocoder
-import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -64,14 +55,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.pickmeup.data.model.SharedViewModel
 import com.example.pickmeup.ui.passenger.ui.theme.PickMeUpTheme
-import com.google.android.gms.location.LocationServices
+import com.example.pickmeup.viewModel.PassengerViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -89,12 +79,6 @@ import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.pow
-import kotlin.math.sin
-import kotlin.math.sqrt
 
 data class BottomNavigationItem(
     val title: String,
@@ -237,7 +221,7 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
     if(targetTitleTest.isNotEmpty()){
         targetTitle= targetTitleTest
     }
-
+    val passengerClass=  PassengerViewModel()
 
 
     Column(
@@ -375,7 +359,7 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
             )
         }
 
-                // time row
+        // time row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -433,7 +417,7 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                          //  Icons.Filled.DateRange,
+                            //  Icons.Filled.DateRange,
                             imageVector = Icons.Default.DateRange,
                             contentDescription = "Clock icon",
                             modifier = Modifier
@@ -450,25 +434,25 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ){
-                Button(
-                    modifier = Modifier
-                        .size(width = 220.dp, height = 50.dp),
-                    shape = RoundedCornerShape(15.dp),
-                    enabled =
-                    isButtonEnabled1 && isButtonEnabled2,
-                    onClick = {
-                        showDialog.value = true
-                        // second confirmation
-                    }) {
-                    Text(
-                        text = "Confirm pick up",
-                        fontSize = 20.sp
-                    )
-                }
+            Button(
+                modifier = Modifier
+                    .size(width = 220.dp, height = 50.dp),
+                shape = RoundedCornerShape(15.dp),
+                enabled =
+                isButtonEnabled1 && isButtonEnabled2,
+                onClick = {
+                    showDialog.value = true
+                    // second confirmation
+                }) {
+                Text(
+                    text = "Confirm pick up",
+                    fontSize = 20.sp
+                )
+            }
         }
     }
     if(showDialog.value) {
-        InfoDialog(sharedViewModel, context)
+        passengerClass.InfoDialog(sharedViewModel, context)
         showDialog.value= false
     }
     MaterialDialog(
@@ -567,6 +551,8 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
         mutableStateOf(0.0)
     }
 
+    val passengerClass=  PassengerViewModel()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -593,7 +579,7 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
         }
         Column (
             modifier = Modifier.fillMaxSize(),
-          //  horizontalAlignment = Alignment.CenterHorizontally,
+            //  horizontalAlignment = Alignment.CenterHorizontally,
         ){
             //display pick up details
             Box(
@@ -721,7 +707,7 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
             IconButton(
                 modifier = Modifier.size(45.dp),
                 onClick = {
-                    getCurrentLocation(context,
+                    passengerClass.getCurrentLocation(context,
                         { latitude, longitude ->
 
                             cameraPosition.move(
@@ -730,7 +716,7 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
                         }
                     ) {
                         // Call the function WhenItIsNull here
-                        WhenItIsNull(context)
+                        passengerClass.WhenItIsNull(context)
                     }
                 }) {
                 Image(
@@ -783,10 +769,10 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
                             cameraPosition.position.target.latitude - 0.00001, cameraPosition.position.target.longitude
                         )
                         // avoid null geolocation
-                        if (reverseGeocode(pickUpLatLng, context).isNullOrEmpty()) {
-                            ShowWifiProblemDialog(context)
+                        if (passengerClass.reverseGeocode(pickUpLatLng, context).isNullOrEmpty()) {
+                            passengerClass.ShowWifiProblemDialog(context)
                         } else {
-                            pickUpTitle = reverseGeocode(pickUpLatLng, context).toString()
+                            pickUpTitle = passengerClass.reverseGeocode(pickUpLatLng, context).toString()
                             pickUpMarkerState = true
                             mainButtonState = if (targetTitle == "Where to?")
                                 "Set Target location"
@@ -796,11 +782,11 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
                     }
                     else if (mainButtonState == "Set Target location") {
                         targetLatLng = LatLng(cameraPosition.position.target.latitude - 0.00001, cameraPosition.position.target.longitude)
-                        if(reverseGeocode(targetLatLng, context).isNullOrEmpty()){
-                            ShowWifiProblemDialog(context)
+                        if(passengerClass.reverseGeocode(targetLatLng, context).isNullOrEmpty()){
+                            passengerClass.ShowWifiProblemDialog(context)
                         }
                         else {
-                            targetTitle = reverseGeocode(targetLatLng, context).toString()
+                            targetTitle = passengerClass.reverseGeocode(targetLatLng, context).toString()
 
                             targetMarkerState = true
 
@@ -809,7 +795,7 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
                             else {
                                 mainButtonState =  "Confirm pick up"
                                 distanceAlpha= 1f
-                                distance= calculateDistance(pickUpLatLng, targetLatLng)
+                                distance= passengerClass.calculateDistance(pickUpLatLng, targetLatLng)
                             }
                         }
                     } else if (mainButtonState == "Confirm pick up") {
@@ -838,148 +824,6 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
         }
     }
 }
-
-                    //FUNCTIONS
-////////////////////////////////////////////////////////////////////////////////////////////
-
-@Composable
-fun InfoDialog(sharedViewModel: SharedViewModel,context: Context) {
-
-    val text= "Pickup Title: ${sharedViewModel.pickUpTitle.value} \n" +
-            "Target Title: ${sharedViewModel.targetTitle.value} \n" +
-            "Pickup Latitude: ${sharedViewModel.pickUpLatLng.value.latitude}\n" +
-            "Pickup Longitude: ${sharedViewModel.pickUpLatLng.value.longitude}\n" +
-            "Target Latitude: ${sharedViewModel.targetLatLng.value.latitude}\n" +
-            "Target Longitude: ${sharedViewModel.targetLatLng.value.longitude}\n" +
-            "Distance: ${sharedViewModel.distance.value}\n"+
-            "Date and Time: ${sharedViewModel.dateAndTime.value}"
-
-    val dialogBuilder = AlertDialog.Builder(context)
-    dialogBuilder.apply {
-        setTitle("Information")
-        setMessage(text)
-        setPositiveButton("OK") { dialog: DialogInterface, _: Int ->
-            dialog.dismiss()
-        }
-    }
-    val dialog = dialogBuilder.create()
-    dialog.show()
-}
-
-
-fun calculateDistance(origin: LatLng, destination: LatLng): Double {
-    val earthRadius = 6371 // Radius of the earth in kilometers
-    // Convert latitude and longitude to radians
-    val latOrigin = Math.toRadians(origin.latitude)
-    val lonOrigin = Math.toRadians(origin.longitude)
-    val latDestination = Math.toRadians(destination.latitude)
-    val lonDestination = Math.toRadians(destination.longitude)
-
-    // Calculate the differences between the coordinates
-    val dLat = latDestination - latOrigin
-    val dLon = lonDestination - lonOrigin
-
-    // Apply the Haversine formula
-    val a = sin(dLat / 2).pow(2) + cos(latOrigin) * cos(latDestination) * sin(dLon / 2).pow(2)
-    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-    val distance = earthRadius * c
-
-    // Format the distance to two decimal places
-    return String.format("%.2f", distance).toDouble()}
-
-
-fun reverseGeocode(latLng: LatLng, context: Context): String? {
-    val latitude = latLng.latitude
-    val longitude = latLng.longitude
-
-    return try {
-        val geoCoder = Geocoder(context, Locale.getDefault())
-        val addresses: List<Address>? = geoCoder.getFromLocation(latitude, longitude, 1)
-
-        if (!addresses.isNullOrEmpty()) {
-            val address = addresses[0]
-            val addressLine = address.getAddressLine(0) ?: ""
-            val streetName = address.thoroughfare ?: ""
-            val fullAddress = if (streetName.isNotEmpty()) "$streetName, $addressLine" else addressLine
-
-            // Split the full address by commas
-            val parts = fullAddress.split(",")
-
-            // Check each part for lowercase letters
-            val cleanedParts = parts.map { part ->
-                val containsLowercase = part.any { it.isLowerCase() }
-                if (!containsLowercase) {
-                    // Remove the part if it doesn't contain any lowercase letters
-                    null
-                } else {
-                    part.trim()
-                }
-            }.filterNotNull()
-
-            cleanedParts.joinToString(", ") // Join the cleaned parts back with commas
-        } else {
-            null
-        }
-    } catch (e: Exception) {
-
-        Toast.makeText(context,"Can't get geolocation",Toast.LENGTH_SHORT).show()
-        null
-    }
-}
-
-fun getCurrentLocation(
-    context: Context,
-    onLocationReceived: (Double, Double) -> Unit,
-    function: () -> Unit
-) {
-    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-        // Request location permissions
-        ActivityCompat.requestPermissions(context as Activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), 0)
-    } else {
-        // Permissions already granted, get the location
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                // Use the location object as needed
-              //  Log.i("xxxx", "Location: ${location?.latitude}, ${location?.longitude}")
-                location?.let {
-                    onLocationReceived(it.latitude, it.longitude)
-                }?: WhenItIsNull(context)
-            }
-    }
-}
-
-
-fun WhenItIsNull(context: Context) {
-    val dialogBuilder = AlertDialog.Builder(context)
-    dialogBuilder.apply {
-        setTitle("Location Information")
-        setMessage("Unable to retrieve your location. Please ensure that your GPS is turned on and that you have a good signal reception.")
-        setPositiveButton("OK") { dialog: DialogInterface, _: Int ->
-            dialog.dismiss()
-        }
-    }
-    val dialog = dialogBuilder.create()
-    dialog.show()
-}
-
-
-fun ShowWifiProblemDialog(context: Context){
-    val dialogBuilder = AlertDialog.Builder(context)
-    dialogBuilder.apply {
-        setTitle("Wifi Information")
-        setMessage("Unable to connect to the internet. Please ensure that your WiFi is turned on and that you have a good signal reception.")
-        setPositiveButton("OK") { dialog: DialogInterface, _: Int ->
-            dialog.dismiss()
-        }
-    }
-    val dialog = dialogBuilder.create()
-    dialog.show()
-}
-
-
-
 
 
 

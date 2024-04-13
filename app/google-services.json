@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "409077857629",
+    "project_id": "pick-me-up-418906",
+    "storage_bucket": "pick-me-up-418906.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:409077857629:android:e3f06f24ab9a3d517afcb4",
+        "android_client_info": {
+          "package_name": "com.example.pickmeup"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAy-zeHNwdXCuV1L0FpeCknMaUthwHmHz4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

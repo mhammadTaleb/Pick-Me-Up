@@ -7,7 +7,7 @@ junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 lifecycleRuntimeKtx = "2.7.0"
 activityCompose = "1.8.2"
-composeBom = "2023.08.00"
+composeBom = "2024.04.00"
 lifecycleViewmodelCompose = "2.7.0"
 material3Android = "1.2.1"
 navigationCompose = "2.7.7"
@@ -34,6 +34,10 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 maps-compose = "com.google.maps.android:maps-compose:2.5.1"
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+
+compose-material-dialogs-datetime = { module = "io.github.vanpra.compose-material-dialogs:datetime", version = "0.9.0" }
+desugar-jdk-libs = { group = "com.android.tools", name = "desugar_jdk_libs", version = "2.0.4" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

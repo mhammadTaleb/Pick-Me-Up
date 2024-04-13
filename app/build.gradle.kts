@@ -7,7 +7,7 @@ plugins {
 android {
     signingConfigs {
         getByName("debug") {
-            storeFile = file("E:\\Backup\\keystore.jks")
+            storeFile = file("C:\\Users\\user\\keystore.jks")
             storePassword = "mohammad"
             keyAlias = "key0"
             keyPassword = "mohammad"
@@ -89,7 +89,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
+    implementation(platform("com.google.firebase:firebase-bom:32.8.1"))
     implementation("com.google.firebase:firebase-auth")
 
 }
