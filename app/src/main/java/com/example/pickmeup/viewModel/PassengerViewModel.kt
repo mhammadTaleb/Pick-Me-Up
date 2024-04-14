@@ -12,7 +12,6 @@ import android.location.Location
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.core.app.ActivityCompat
-import com.example.pickmeup.data.model.SharedViewModel
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import java.util.Locale
@@ -143,16 +142,16 @@ class PassengerViewModel {
 
 
     @Composable
-    fun InfoDialog(sharedViewModel: SharedViewModel, context: Context) {
+    fun InfoDialog(pickUpViewModel: PickUpViewModel, context: Context) {
 
-        val text= "Pickup Title: ${sharedViewModel.pickUpTitle.value} \n" +
-                "Target Title: ${sharedViewModel.targetTitle.value} \n" +
-                "Pickup Latitude: ${sharedViewModel.pickUpLatLng.value.latitude}\n" +
-                "Pickup Longitude: ${sharedViewModel.pickUpLatLng.value.longitude}\n" +
-                "Target Latitude: ${sharedViewModel.targetLatLng.value.latitude}\n" +
-                "Target Longitude: ${sharedViewModel.targetLatLng.value.longitude}\n" +
-                "Distance: ${sharedViewModel.distance.value} Km\n"+
-                "Date and Time: ${sharedViewModel.dateAndTime.value}"
+        val text= "Pickup Title: ${pickUpViewModel.pickUpTitle.value} \n" +
+                "Target Title: ${pickUpViewModel.targetTitle.value} \n" +
+                "Pickup Latitude: ${pickUpViewModel.pickUpLatLng.value.latitude}\n" +
+                "Pickup Longitude: ${pickUpViewModel.pickUpLatLng.value.longitude}\n" +
+                "Target Latitude: ${pickUpViewModel.targetLatLng.value.latitude}\n" +
+                "Target Longitude: ${pickUpViewModel.targetLatLng.value.longitude}\n" +
+                "Distance: ${pickUpViewModel.distance.value} Km\n"+
+                "Date and Time: ${pickUpViewModel.dateAndTime.value}"
 
         val dialogBuilder = AlertDialog.Builder(context)
         dialogBuilder.apply {

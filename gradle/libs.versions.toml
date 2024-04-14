@@ -44,6 +44,10 @@ volley = { group = "com.android.volley", name = "volley", version.ref = "volley"
 
 maps-platform = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1"
 
+room= "androidx.room:room-runtime:2.6.1"
+kapt= "androidx.room:room-compiler:2.6.1"
+room-ktx= "androidx.room:room-ktx:2.6.1"
+
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

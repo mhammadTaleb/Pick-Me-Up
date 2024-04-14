@@ -102,6 +102,11 @@ dependencies {
 
     implementation(libs.maps.platform)
 
+    implementation(libs.room)
+    implementation(libs.kapt)
+    implementation((libs.room.ktx))
+
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

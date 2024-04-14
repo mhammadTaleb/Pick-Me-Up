@@ -1,11 +1,11 @@
-package com.example.pickmeup.data.model
+package com.example.pickmeup.viewModel
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
 
-class SharedViewModel : ViewModel() {
+class PickUpViewModel : ViewModel() {
     val pickUpTitle: MutableState<String> = mutableStateOf("")
     val targetTitle: MutableState<String> = mutableStateOf("")
 

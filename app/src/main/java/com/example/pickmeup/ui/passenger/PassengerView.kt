@@ -63,7 +63,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.pickmeup.data.model.SharedViewModel
+import com.example.pickmeup.viewModel.PickUpViewModel
 import com.example.pickmeup.ui.passenger.ui.theme.PickMeUpTheme
 import com.example.pickmeup.viewModel.PassengerViewModel
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -91,7 +91,7 @@ data class BottomNavigationItem(
     val unselectedIcon: ImageVector
 )
 class PassengerView : ComponentActivity() {
-    private val sharedViewModel: SharedViewModel by viewModels()
+    private val pickUpViewModel: PickUpViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -142,7 +142,7 @@ class PassengerView : ComponentActivity() {
                                     SearchScreen(navController)
                                 }
                                 composable("home") {
-                                    HomeScreen(navController, this@PassengerView, sharedViewModel)
+                                    HomeScreen(navController, this@PassengerView, pickUpViewModel)
                                 }
                                 composable("profile") {
                                     ProfileScreen(navController)
@@ -158,15 +158,15 @@ class PassengerView : ComponentActivity() {
 
 
 @Composable
-fun HomeScreen(navController: NavHostController, context: Context, sharedViewModel: SharedViewModel) {
+fun HomeScreen(navController: NavHostController, context: Context, pickUpViewModel: PickUpViewModel) {
 
 
     NavHost(navController = navController, startDestination = "pickUps") {
         composable("pickUps") {
-            PickUps(context, navController, sharedViewModel)
+            PickUps(context, navController, pickUpViewModel)
         }
         composable("mapView") {
-            MapView(context, navController, sharedViewModel)
+            MapView(context, navController, pickUpViewModel)
         }
     }
 }
@@ -174,7 +174,7 @@ fun HomeScreen(navController: NavHostController, context: Context, sharedViewMod
 
 
 @Composable
-fun PickUps(context: Context, navController: NavHostController, sharedViewModel: SharedViewModel){
+fun PickUps(context: Context, navController: NavHostController, pickUpViewModel: PickUpViewModel){
 
 
     var pickUpTitle by remember {
@@ -212,8 +212,8 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
     var isButtonEnabled1 by remember { mutableStateOf(false) }
     var isButtonEnabled2 by remember { mutableStateOf(false) }
 
-    val pickUpTitleTest = sharedViewModel.pickUpTitle.value
-    val targetTitleTest = sharedViewModel.targetTitle.value
+    val pickUpTitleTest = pickUpViewModel.pickUpTitle.value
+    val targetTitleTest = pickUpViewModel.targetTitle.value
 
     val showDialog = remember { mutableStateOf(false) }
 
@@ -227,8 +227,8 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
     }
     val passengerClass=  PassengerViewModel()
 
-    val sharedViewModels= remember {
-        mutableStateListOf<SharedViewModel>()
+    val pickUpViewModels= remember {
+        mutableStateListOf<PickUpViewModel>()
     }
 
     Column(
@@ -448,7 +448,7 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
                 enabled =
                 isButtonEnabled1 && isButtonEnabled2,
                 onClick = {
-                    sharedViewModels.add(sharedViewModel)
+                    pickUpViewModels.add(pickUpViewModel)
                     showDialog.value = true
 
                     // second confirmation
@@ -469,8 +469,8 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
                 modifier = Modifier.fillMaxHeight(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(sharedViewModels) { sharedViewModel ->
-                    PickUpsEntry(sharedViewModel = sharedViewModel, onDelete = { sharedViewModels.remove(it) })
+                items(pickUpViewModels) { sharedViewModel ->
+                    PickUpsEntry(pickUpViewModel = sharedViewModel, onDelete = { pickUpViewModels.remove(it) })
                 }
             }
         }
@@ -478,7 +478,7 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
 
 
     if(showDialog.value) {
-        passengerClass.InfoDialog(sharedViewModel, context)
+        passengerClass.InfoDialog(pickUpViewModel, context)
         showDialog.value= false
     }
     MaterialDialog(
@@ -522,7 +522,7 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
             pickedTime= it
             isButtonEnabled2=true
             val dateAndTimeField ="$formattedDate, $formattedTime"
-            sharedViewModel.setDateAndTime(dateAndTimeField)
+            pickUpViewModel.setDateAndTime(dateAndTimeField)
         }
     }
 
@@ -531,7 +531,7 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
 
 
 @Composable
-fun MapView(context: Context,navController: NavHostController, sharedViewModel: SharedViewModel){
+fun MapView(context: Context, navController: NavHostController, pickUpViewModel: PickUpViewModel){
 
     // var defaultLocation=  LatLng(33.8938,35.5018)
 
@@ -826,13 +826,13 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
                         }
                     } else if (mainButtonState == "Confirm pick up") {
 
-                        sharedViewModel.setPickUpTitle(pickUpTitle)
-                        sharedViewModel.setTargetTitle(targetTitle)
+                        pickUpViewModel.setPickUpTitle(pickUpTitle)
+                        pickUpViewModel.setTargetTitle(targetTitle)
 
-                        sharedViewModel.setPickUpLatLng(pickUpLatLng)
-                        sharedViewModel.setTargetLatLng(targetLatLng)
+                        pickUpViewModel.setPickUpLatLng(pickUpLatLng)
+                        pickUpViewModel.setTargetLatLng(targetLatLng)
 
-                        sharedViewModel.setDistance(distance)
+                        pickUpViewModel.setDistance(distance)
                         navController.navigate("pickUps")
 
                         Toast.makeText(context, "Confirmation", Toast.LENGTH_SHORT).show()  //confirmation
@@ -855,7 +855,7 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
 
 
 @Composable
-fun PickUpsEntry(sharedViewModel: SharedViewModel, onDelete: (SharedViewModel) -> Unit ){
+fun PickUpsEntry(pickUpViewModel: PickUpViewModel, onDelete: (PickUpViewModel) -> Unit ){
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -867,13 +867,13 @@ fun PickUpsEntry(sharedViewModel: SharedViewModel, onDelete: (SharedViewModel) -
     ) {
         Column {
             Text(
-                text = "Pick up: ${sharedViewModel.pickUpTitle.value}",
+                text = "Pick up: ${pickUpViewModel.pickUpTitle.value}",
                 fontSize = 12.sp,
                 color = Color.Black,
                 modifier = Modifier.fillMaxWidth() // Add this line
             )
             Text(
-                text = "Destination: ${sharedViewModel.targetTitle.value}",
+                text = "Destination: ${pickUpViewModel.targetTitle.value}",
                 fontSize = 12.sp,
                 color = Color.Black,
                 modifier = Modifier.fillMaxWidth() // Add this line
@@ -883,7 +883,7 @@ fun PickUpsEntry(sharedViewModel: SharedViewModel, onDelete: (SharedViewModel) -
                 modifier = Modifier.fillMaxWidth(), // Add this line
                 horizontalArrangement = Arrangement.End // Add this line
             ) {
-                IconButton(onClick = { onDelete(sharedViewModel) }) {
+                IconButton(onClick = { onDelete(pickUpViewModel) }) {
                     Image(
                         painter = painterResource(id = com.example.pickmeup.R.drawable.delete_icon),
                         contentDescription = "delete"
