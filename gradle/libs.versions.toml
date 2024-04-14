@@ -42,6 +42,7 @@ firebase-auth = "com.google.firebase:firebase-auth-ktx:22.3.1"
 
 volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
 
+maps-platform = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1"
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

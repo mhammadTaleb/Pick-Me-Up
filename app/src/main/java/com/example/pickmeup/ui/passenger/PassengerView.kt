@@ -13,12 +13,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -41,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -79,6 +83,7 @@ import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+
 
 data class BottomNavigationItem(
     val title: String,
@@ -222,6 +227,9 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
     }
     val passengerClass=  PassengerViewModel()
 
+    val sharedViewModels= remember {
+        mutableStateListOf<SharedViewModel>()
+    }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -440,7 +448,9 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
                 enabled =
                 isButtonEnabled1 && isButtonEnabled2,
                 onClick = {
+                    sharedViewModels.add(sharedViewModel)
                     showDialog.value = true
+
                     // second confirmation
                 }) {
                 Text(
@@ -449,7 +459,24 @@ fun PickUps(context: Context, navController: NavHostController, sharedViewModel:
                 )
             }
         }
+                    // pick ups HISTORY
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+
+            LazyColumn(
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(sharedViewModels) { sharedViewModel ->
+                    PickUpsEntry(sharedViewModel = sharedViewModel, onDelete = { sharedViewModels.remove(it) })
+                }
+            }
+        }
     }
+
+
     if(showDialog.value) {
         passengerClass.InfoDialog(sharedViewModel, context)
         showDialog.value= false
@@ -827,7 +854,45 @@ fun MapView(context: Context,navController: NavHostController, sharedViewModel: 
 
 
 
+@Composable
+fun PickUpsEntry(sharedViewModel: SharedViewModel, onDelete: (SharedViewModel) -> Unit ){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = Color.White, shape = RoundedCornerShape(8.dp))
+            .border(width = 1.dp, color = Color.Black, shape = RoundedCornerShape(8.dp))
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            Text(
+                text = "Pick up: ${sharedViewModel.pickUpTitle.value}",
+                fontSize = 12.sp,
+                color = Color.Black,
+                modifier = Modifier.fillMaxWidth() // Add this line
+            )
+            Text(
+                text = "Destination: ${sharedViewModel.targetTitle.value}",
+                fontSize = 12.sp,
+                color = Color.Black,
+                modifier = Modifier.fillMaxWidth() // Add this line
+            )
 
+            Row(
+                modifier = Modifier.fillMaxWidth(), // Add this line
+                horizontalArrangement = Arrangement.End // Add this line
+            ) {
+                IconButton(onClick = { onDelete(sharedViewModel) }) {
+                    Image(
+                        painter = painterResource(id = com.example.pickmeup.R.drawable.delete_icon),
+                        contentDescription = "delete"
+                    )
+                }
+            }
+        }
+    }
+}
 
 
 

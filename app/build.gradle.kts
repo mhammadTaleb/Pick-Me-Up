@@ -21,6 +21,7 @@ android {
         applicationId = "com.example.pickmeup"
         minSdk = 24
         targetSdk = 34
+        compileSdk= 34
         versionCode = 1
         versionName = "1.0"
 
@@ -98,6 +99,8 @@ dependencies {
     implementation(libs.compose.material.dialogs.datetime)
     implementation(libs.volley)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    implementation(libs.maps.platform)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
