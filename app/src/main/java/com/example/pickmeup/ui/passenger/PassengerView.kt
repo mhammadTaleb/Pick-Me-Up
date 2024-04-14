@@ -155,7 +155,6 @@ class PassengerView : ComponentActivity() {
 @Composable
 fun HomeScreen(navController: NavHostController, context: Context, sharedViewModel: SharedViewModel) {
 
-    val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "pickUps") {
         composable("pickUps") {

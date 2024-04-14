@@ -15,11 +15,10 @@ class OTPViewModel: ViewModel(){
     var phoneNumber = mutableStateOf("")
         private set
 
-    private lateinit var auth: FirebaseAuth
+    private var auth: FirebaseAuth = FirebaseAuth.getInstance()
     private lateinit var callbacks: PhoneAuthProvider.OnVerificationStateChangedCallbacks
 
     init {
-        auth = FirebaseAuth.getInstance()
         setupCallbacks()
     }
     fun updatePhoneNumber(newPhoneNumber: String){
@@ -90,7 +89,7 @@ class OTPViewModel: ViewModel(){
 
 fun register(registerViewModel: RegisterViewModel) {
     // Check the user's role
-    if (registerViewModel.role.value == 0) { // Assuming 0 is for passenger
+    if (registerViewModel.role.intValue == 0) { // Assuming 0 is for passenger
         // Create a new Passenger object
 //        val passenger = Passenger(user.uid, registerViewModel.firstName.value, registerViewModel.lastName.value, phoneNumber.value)
         // Add the passenger to your database
